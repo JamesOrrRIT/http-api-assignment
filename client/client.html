@@ -5,7 +5,65 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+    const handlerResponse = (response) => {
+      response.text().then((resText) => {
+        let contentType = response.headers.get('Content-Type');
+        const content = document.getElementById('content');
 
+        const h1 = document.createElement('h1');
+
+        switch(response.status) {
+          case 200:
+            h1.textContent = `Success`;
+            break;
+          case 400:
+            h1.textContent = `Bad Request`;
+            break;
+          case 401:
+            h1.textContent = `Unauthorized`;
+            break;
+          case 403:
+            h1.textContent = `Forbidden`;
+            break;
+          case 404:
+            h1.textContent = `Resource Not Found`;
+            break;
+          case 500:
+            h1.textContent = `Internal Server Error`;
+            break;
+          case 501:
+            h1.textContent = `Not Implemented`;
+            break;
+          default:
+            h1.textContent = `Resource Not Found`;
+            break;
+        }
+
+        content.appendChild(h1);
+        content.appendChild(p);
+
+        console.dir(resText);;
+      });
+    };
+
+    const sendFetch = async () => {
+      const url = document.querySelector("#page").value;
+      const acceptedType = document.querySelector("#type").value;
+
+      const options = {
+        method: 'GET',
+        headers: {'Accept': acceptedType}
+      }
+
+      let response = await fetch(url, options);
+
+      handlerResponse(response);
+    }
+
+    const init = () => {
+      const sendButton = document.querySelector("#send");
+      sendButton.addEventListener('click', sendFetch);
+    }
   </script>
 </head>
 <body>
