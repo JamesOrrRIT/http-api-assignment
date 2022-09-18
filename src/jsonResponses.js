@@ -36,7 +36,6 @@ const respondJSON = (request, response, status, object) => {
       return respondXML(request, response, 200, responseXML);
     }
   
-    console.log('Success!');
     return respondJSON(request, response, 200, responseJSON);
   };
   
