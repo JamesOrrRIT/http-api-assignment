@@ -5,65 +5,75 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
-    const handlerResponse = (response) => {
-      response.text().then((resText) => {
-        let contentType = response.headers.get('Content-Type');
-        const content = document.getElementById('content');
+    const handleResponse = async (response) => {
+      const content = document.getElementById('content');
+      let contentType = response.headers.get('Content-Type');
 
-        const h1 = document.createElement('h1');
+      switch(response.status){
+        case 200:
+          content.innerHTML = `<b>Success!</b>`;
+          break;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 401:
+          content.innerHTML = `<b>Unauthorized</b>`;
+          break;
+        case 403:
+          content.innerHTML = `<b>Forbidden</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Not Found</b>`;
+          break;
+        case 500:
+          content.innerHTML = `<b>Internal Error</b>`;
+          break;
+        case 501:
+          content.innerHTML = `<b>Not Implemented</b>`;
+          break;
+        default:
+          content.innerHTML = `<p>Code not implemented</p>`;
+          break;
+      }
 
-        switch(response.status) {
-          case 200:
-            h1.textContent = `Success`;
-            break;
-          case 400:
-            h1.textContent = `Bad Request`;
-            break;
-          case 401:
-            h1.textContent = `Unauthorized`;
-            break;
-          case 403:
-            h1.textContent = `Forbidden`;
-            break;
-          case 404:
-            h1.textContent = `Resource Not Found`;
-            break;
-          case 500:
-            h1.textContent = `Internal Server Error`;
-            break;
-          case 501:
-            h1.textContent = `Not Implemented`;
-            break;
-          default:
-            h1.textContent = `Resource Not Found`;
-            break;
-        }
+    response.text().then((resText) => {
+      let contentType = response.headers.get('Content-Type');
+      if(contentType === 'application/json') {
 
-        content.appendChild(h1);
-        content.appendChild(p);
+          let parsedResponse = JSON.parse(resText);
+          console.log(parsedResponse);
+          content.innerHTML += `<p>Message: ${parsedResponse.message}</p>`;
 
-        console.dir(resText);;
+      } else if (contentType === 'text/xml') {
+          let parsedResponse = new window.DOMParser().parseFromString(resText, 'text/xml');
+          console.log(parsedResponse);
+          content.innerHTML += `<p>Message: ${parsedResponse.querySelector('message').textContent}</p>`;
+      }
+
       });
     };
 
-    const sendFetch = async () => {
-      const url = document.querySelector("#page").value;
-      const acceptedType = document.querySelector("#type").value;
-
+    const sendFetch = async (url, acceptedType) => {
       const options = {
         method: 'GET',
-        headers: {'Accept': acceptedType}
+        headers: {'Accept': acceptedType},
       }
 
-      let response = await fetch(url, options);
-
-      handlerResponse(response);
-    }
+      let fetchPromise = fetch(url, options);
+      fetchPromise.then((response) => { handleResponse(response) });
+    };
 
     const init = () => {
-      const sendButton = document.querySelector("#send");
-      sendButton.addEventListener('click', sendFetch);
-    }
+      const page = document.getElementById('page');
+      const type = document.getElementById('type');
+
+      const responseType = () => sendFetch(page.value,type.value);
+
+      const send = document.getElementById('send');
+      send.addEventListener('click',responseType);
+    };
+
+    window.onload = init;
   </script>
 </head>
 <body>
